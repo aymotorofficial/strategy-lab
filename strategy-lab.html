@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>STRATEGY LAB</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #060d06; --card: #0d1a0d; --card2: #122012; --border: #1e3a1e;
+    --green: #00ff41; --green-dim: #00c931; --green-dark: #003a0f;
+    --green-glow: rgba(0,255,65,0.15); --text: #e8ffe8;
+    --muted: #2a4a2a; --muted2: #4a7a4a;
+    --accent1: #aaff00; --accent2: #00ffaa; --accent3: #ff4500;
+  }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh; display: flex; justify-content: center;
+    padding: 16px 16px 60px;
+    background-image: radial-gradient(ellipse at top left, rgba(0,255,65,0.06) 0%, transparent 60%), radial-gradient(ellipse at bottom right, rgba(0,200,50,0.04) 0%, transparent 60%);
+  }
+  .app { width: 100%; max-width: 430px; }
+  body::before {
+    content: ''; position: fixed; top:0;left:0;right:0;bottom:0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.012) 2px, rgba(0,255,65,0.012) 4px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* HEADER */
+  .header { display:flex; justify-content:space-between; align-items:center; padding:12px 0 18px; position:relative; z-index:1; }
+  .guide-btn { border:2px solid var(--green); border-radius:4px; padding:7px 16px; font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--green); background:transparent; cursor:pointer; letter-spacing:2px; box-shadow:0 0 10px rgba(0,255,65,0.2); transition:all 0.2s; }
+  .guide-btn:hover { background:var(--green-glow); }
+  .lang-toggle { display:flex; gap:3px; border:2px solid var(--border); border-radius:4px; padding:3px; background:var(--card); }
+  .lang-btn { padding:5px 13px; border-radius:2px; border:none; font-family:'Share Tech Mono',monospace; font-size:10px; font-weight:700; cursor:pointer; letter-spacing:2px; transition:all 0.15s; }
+  .lang-btn.active { background:var(--green); color:#000; box-shadow:0 0 8px rgba(0,255,65,0.5); }
+  .lang-btn.inactive { background:transparent; color:var(--muted2); }
+
+  /* TITLE */
+  .title-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; position:relative; z-index:1; }
+  .title { font-family:'Bebas Neue',sans-serif; font-size:44px; letter-spacing:6px; line-height:1; }
+  .title .str { color:var(--green); text-shadow:0 0 20px rgba(0,255,65,0.6); }
+  .title-sub { font-family:'Bebas Neue',sans-serif; font-size:44px; letter-spacing:6px; color:var(--accent1); text-shadow:0 0 20px rgba(170,255,0,0.5); line-height:1; margin-bottom:14px; }
+  .dots { display:flex; flex-direction:column; gap:5px; align-items:flex-end; }
+  .dot-row { display:flex; gap:5px; }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.g1 { background:var(--green); box-shadow:0 0 6px var(--green); }
+  .dot.g2 { background:var(--accent1); box-shadow:0 0 6px var(--accent1); }
+  .dot.g3 { background:var(--accent2); box-shadow:0 0 6px var(--accent2); }
+  .dot.g4 { background:var(--accent3); box-shadow:0 0 6px var(--accent3); }
+
+  /* STATUS */
+  .status-bar { display:flex; align-items:center; gap:8px; margin-bottom:16px; position:relative; z-index:1; }
+  .status-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  .status-text { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted2); letter-spacing:2px; }
+
+  /* CARD */
+  .card { background:var(--card); border-radius:8px; padding:20px; border:1.5px solid var(--border); position:relative; z-index:1; box-shadow:0 0 40px rgba(0,255,65,0.05); }
+  .card::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; background:linear-gradient(90deg,transparent,var(--green),var(--accent1),transparent); border-radius:8px 8px 0 0; }
+
+  /* TOP ACTIONS */
+  .top-actions { display:flex; gap:10px; margin-bottom:22px; }
+  .action-btn { border-radius:4px; padding:10px 18px; font-family:'Share Tech Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1.5px; cursor:pointer; display:flex; align-items:center; gap:7px; transition:all 0.2s; text-transform:uppercase; }
+  .btn-gen { background:var(--green-dark); color:var(--green); border:1.5px solid var(--green); box-shadow:0 0 10px rgba(0,255,65,0.15); }
+  .btn-gen:hover { background:var(--green-glow); }
+  .btn-reset { background:var(--card2); color:var(--muted2); border:1.5px solid var(--border); }
+  .btn-reset:hover { border-color:var(--muted2); color:var(--text); }
+
+  /* SECTION LABEL */
+  .section-label { font-family:'Share Tech Mono',monospace; font-size:11px; font-weight:700; color:var(--green); letter-spacing:2.5px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .section-label::before { content:'//'; color:var(--muted2); font-size:10px; }
+
+  /* UPLOAD */
+  .upload-area { border:1.5px dashed var(--border); border-radius:6px; padding:36px 20px; text-align:center; cursor:pointer; margin-bottom:12px; transition:all 0.2s; background:rgba(0,255,65,0.02); }
+  .upload-area:hover { border-color:var(--green); background:rgba(0,255,65,0.05); box-shadow:0 0 15px rgba(0,255,65,0.1); }
+  .upload-icon { font-size:24px; margin-bottom:8px; }
+  .upload-area p { color:var(--muted2); font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; line-height:2; }
+  .upload-area p span { color:var(--muted); font-size:9px; }
+
+  /* THUMBS */
+  .thumbs { display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap; }
+  .thumb { position:relative; width:64px; height:64px; border-radius:6px; border:1.5px solid var(--border); }
+  .thumb img { width:100%; height:100%; object-fit:cover; border-radius:4px; display:block; }
+  .thumb-remove { position:absolute; top:-7px; right:-7px; width:18px; height:18px; background:var(--accent3); border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; font-weight:900; }
+
+  /* STORY */
+  .story-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+  .hook-btn { width:66px; height:66px; border-radius:50%; border:2px solid var(--accent1); background:rgba(170,255,0,0.05); color:var(--accent1); font-family:'Share Tech Mono',monospace; font-size:8px; font-weight:700; letter-spacing:1px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-align:center; box-shadow:0 0 12px rgba(170,255,0,0.2); line-height:1.4; }
+  .hook-btn .icon { font-size:16px; }
+  textarea.story-input { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:6px; padding:14px; color:var(--text); font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:500; resize:none; height:85px; outline:none; margin-bottom:22px; transition:border-color 0.2s; }
+  textarea.story-input:focus { border-color:var(--green); }
+  textarea.story-input::placeholder { color:var(--muted2); }
+
+  /* SCENE */
+  .scene-row { display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+  .scene-box { width:80px; height:80px; background:var(--card2); border:1.5px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:42px; color:var(--green); cursor:pointer; user-select:none; text-shadow:0 0 15px rgba(0,255,65,0.5); transition:all 0.15s; }
+  .scene-box:hover { border-color:var(--green); }
+  .scene-hint { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--muted2); letter-spacing:1px; line-height:1.8; }
+
+  /* CUSTOM DROPDOWN */
+  .custom-select { position:relative; margin-bottom:22px; }
+  .custom-select-btn { width:100%; background:var(--card2); border:1.5px solid var(--border); border-radius:6px; padding:14px 16px; color:var(--text); font-family:'Share Tech Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:border-color 0.2s; text-align:left; }
+  .custom-select-btn:hover, .custom-select-btn.open { border-color:var(--green); }
+  .drop-arrow { color:var(--muted2); font-size:12px; transition:transform 0.2s; pointer-events:none; }
+  .custom-select-btn.open .drop-arrow { transform:rotate(180deg); }
+  .dropdown-menu { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:#1a2a1a; border:1.5px solid var(--green); border-radius:8px; z-index:100; box-shadow:0 8px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,255,65,0.1); overflow:hidden; }
+  .dropdown-menu.open { display:block; }
+  .dropdown-item { display:flex; justify-content:space-between; align-items:center; padding:16px 18px; cursor:pointer; font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; color:var(--text); border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.15s; }
+  .dropdown-item:last-child { border-bottom:none; }
+  .dropdown-item:hover { background:rgba(0,255,65,0.08); color:var(--green); }
+  .dropdown-item.selected { color:var(--green); }
+  .radio-circle { width:20px; height:20px; border-radius:50%; border:2px solid var(--muted2); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+  .dropdown-item.selected .radio-circle { border-color:var(--accent2); background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
+  .radio-dot { width:8px; height:8px; border-radius:50%; background:#000; }
+
+  /* BUTTONS */
+  .btn-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+  .btn-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:22px; }
+  .sel-btn { background:var(--card2); border:1.5px solid var(--border); border-radius:6px; padding:13px 6px; color:var(--muted2); font-family:'Share Tech Mono',monospace; font-size:9px; font-weight:700; letter-spacing:1px; cursor:pointer; text-align:center; line-height:1.6; transition:all 0.15s; text-transform:uppercase; }
+  .sel-btn:hover { border-color:var(--green); color:var(--text); }
+  .sel-btn.active { background:rgba(0,255,65,0.12); color:var(--green); border-color:var(--green); box-shadow:0 0 10px rgba(0,255,65,0.15); text-shadow:0 0 8px rgba(0,255,65,0.4); }
+
+  /* RATIO */
+  .ratio-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:26px; }
+  .ratio-btn { background:var(--card2); border:1.5px solid var(--border); border-radius:6px; padding:14px; color:var(--muted2); font-family:'Share Tech Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; cursor:pointer; text-align:center; transition:all 0.15s; }
+  .ratio-btn:hover { border-color:var(--green); color:var(--text); }
+  .ratio-btn.active { background:rgba(0,255,65,0.12); color:var(--green); border-color:var(--green); box-shadow:0 0 10px rgba(0,255,65,0.15); }
+
+  /* DIVIDER */
+  .divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:4px 0 22px; }
+
+  /* PREVIEW */
+  .preview-wrap { border:2px solid var(--green); border-radius:8px; padding:10px; margin-bottom:22px; box-shadow:0 0 20px rgba(0,255,65,0.1); background:var(--card2); }
+  .preview-inner { background:#080808; border-radius:4px; aspect-ratio:9/16; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border:1px solid var(--border); }
+  .preview-inner.horz { aspect-ratio:16/9; }
+  .preview-label { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--muted2); letter-spacing:3px; text-align:center; position:relative; z-index:1; }
+  .preview-grid { position:absolute; top:0;left:0;right:0;bottom:0; background-image:linear-gradient(rgba(0,255,65,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,0.03) 1px,transparent 1px); background-size:20px 20px; }
+  .preview-corner { position:absolute; width:20px; height:20px; }
+  .preview-corner.tl { top:8px;left:8px; border-top:2px solid var(--green); border-left:2px solid var(--green); }
+  .preview-corner.tr { top:8px;right:8px; border-top:2px solid var(--green); border-right:2px solid var(--green); }
+  .preview-corner.bl { bottom:8px;left:8px; border-bottom:2px solid var(--green); border-left:2px solid var(--green); }
+  .preview-corner.br { bottom:8px;right:8px; border-bottom:2px solid var(--green); border-right:2px solid var(--green); }
+
+  /* GENERATE */
+  .generate-btn { width:100%; background:linear-gradient(135deg,#004d12,#007a1e); color:var(--green); border:2px solid var(--green); border-radius:6px; padding:18px; font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:6px; cursor:pointer; transition:all 0.2s; text-shadow:0 0 15px rgba(0,255,65,0.7); box-shadow:0 0 20px rgba(0,255,65,0.2); position:relative; overflow:hidden; }
+  .generate-btn::before { content:''; position:absolute; top:-50%;left:-60%; width:40%;height:200%; background:rgba(255,255,255,0.05); transform:skewX(-20deg); transition:left 0.4s; }
+  .generate-btn:hover { box-shadow:0 0 40px rgba(0,255,65,0.4); }
+  .generate-btn:hover::before { left:120%; }
+  .generate-btn:active { transform:scale(0.98); }
+
+  /* MODAL */
+  .modal-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.88); z-index:200; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:#0d1a0d; border:2px solid var(--green); border-radius:10px; width:100%; max-width:420px; padding:24px; position:relative; box-shadow:0 0 50px rgba(0,255,65,0.15); max-height:90vh; overflow-y:auto; }
+  .modal::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; background:linear-gradient(90deg,transparent,var(--green),var(--accent1),transparent); border-radius:10px 10px 0 0; }
+  .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+  .modal-title { font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--green); letter-spacing:3px; font-weight:700; }
+  .modal-close { background:none; border:none; color:var(--muted2); font-size:18px; cursor:pointer; padding:4px; transition:color 0.2s; }
+  .modal-close:hover { color:var(--accent3); }
+  .modal-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green); letter-spacing:2px; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+  .modal-label::before { content:'//'; color:var(--muted2); }
+  textarea.modal-input { width:100%; background:#0a140a; border:1.5px solid var(--border); border-radius:6px; padding:14px; color:var(--text); font-family:'Rajdhani',sans-serif; font-size:13px; resize:none; height:110px; outline:none; margin-bottom:20px; transition:border-color 0.2s; }
+  textarea.modal-input:focus { border-color:var(--green); }
+  textarea.modal-input::placeholder { color:var(--muted2); }
+
+  /* STYLE SELECT */
+  .style-select { position:relative; margin-bottom:20px; }
+  .style-btn { width:100%; background:#0a140a; border:1.5px solid var(--border); border-radius:6px; padding:14px 16px; color:var(--text); font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:border-color 0.2s; }
+  .style-btn:hover, .style-btn.open { border-color:var(--green); }
+  .style-arrow { color:var(--muted2); font-size:12px; transition:transform 0.2s; }
+  .style-btn.open .style-arrow { transform:rotate(180deg); }
+  .style-menu { display:none; position:absolute; top:calc(100% + 4px); left:0;right:0; background:#1a2a1a; border:1.5px solid var(--green); border-radius:8px; z-index:300; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.9); }
+  .style-menu.open { display:block; }
+  .style-item { display:flex; justify-content:space-between; align-items:center; padding:15px 18px; cursor:pointer; font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; color:var(--text); border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.15s; }
+  .style-item:last-child { border-bottom:none; }
+  .style-item:hover { background:rgba(0,255,65,0.08); color:var(--green); }
+  .style-item.selected { color:var(--green); }
+
+  /* MODAL GEN BTN */
+  .modal-gen-btn { width:100%; background:linear-gradient(135deg,#004d12,#007a1e); color:var(--green); border:2px solid var(--green); border-radius:6px; padding:16px; font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:5px; cursor:pointer; transition:all 0.2s; text-shadow:0 0 12px rgba(0,255,65,0.6); box-shadow:0 0 15px rgba(0,255,65,0.15); margin-bottom:16px; }
+  .modal-gen-btn:hover { box-shadow:0 0 30px rgba(0,255,65,0.35); }
+
+  /* MODAL PREVIEW */
+  .modal-preview { background:#080808; border:1px solid var(--border); border-radius:6px; min-height:200px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .modal-preview-grid { position:absolute; top:0;left:0;right:0;bottom:0; background-image:linear-gradient(rgba(0,255,65,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,0.03) 1px,transparent 1px); background-size:20px 20px; }
+  .modal-preview-text { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted2); letter-spacing:2px; text-align:center; position:relative; z-index:1; }
+
+  /* OUTPUT BOX */
+  #outputBox { border:1.5px solid var(--green); border-radius:8px; overflow:hidden; }
+  .out-loading { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--green); letter-spacing:2px; padding:24px; text-align:center; animation:blink 1s infinite; }
+  .out-section { padding:16px; border-bottom:1px solid var(--border); }
+  .out-section:last-child { border-bottom:none; }
+  .out-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green); letter-spacing:2px; margin-bottom:10px; }
+  .out-content { font-family:'Rajdhani',sans-serif; font-size:13px; color:var(--text); line-height:1.7; background:var(--card2); padding:12px; border-radius:6px; border:1px solid var(--border); }
+  .hook-text { color:var(--accent1); font-size:15px; font-weight:700; text-shadow:0 0 10px rgba(170,255,0,0.3); }
+  .cta-text { color:var(--accent2); font-weight:700; }
+  .prompt-text { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted2); letter-spacing:1px; }
+  .out-scene { display:flex; gap:12px; align-items:flex-start; margin-bottom:8px; background:var(--card2); padding:10px 12px; border-radius:6px; border:1px solid var(--border); }
+  .out-scene:last-child { margin-bottom:0; }
+  .scene-num { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--green); text-shadow:0 0 8px rgba(0,255,65,0.5); line-height:1; flex-shrink:0; }
+  .copy-btn { margin-top:10px; background:var(--green-dark); color:var(--green); border:1.5px solid var(--green); border-radius:4px; padding:8px 16px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; cursor:pointer; width:100%; }
+  .copy-btn:hover { background:var(--green-glow); }
+
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--green); color:#000; font-family:'Share Tech Mono',monospace; font-size:11px; font-weight:700; padding:12px 24px; border-radius:4px; letter-spacing:2px; opacity:0; transition:all 0.3s; z-index:999; box-shadow:0 0 20px rgba(0,255,65,0.5); }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <button class="guide-btn">[ ? ] GUIDE</button>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang(this)">EN</button>
+      <button class="lang-btn inactive" onclick="setLang(this)">MS</button>
+    </div>
+  </div>
+
+  <div class="title-row">
+    <div>
+      <div class="title"><span class="str">STRAT</span><span>EGY</span></div>
+      <div class="title-sub">LAB</div>
+    </div>
+    <div class="dots">
+      <div class="dot-row"><div class="dot g1"></div><div class="dot g2"></div></div>
+      <div class="dot-row"><div class="dot g3"></div><div class="dot g4"></div></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span class="status-text">SYSTEM ONLINE // CONTENT ENGINE READY</span>
+  </div>
+
+  <div class="card">
+    <div class="top-actions">
+      <button class="action-btn btn-gen" onclick="openModal()">⬡ CONTENT GEN</button>
+      <button class="action-btn btn-reset" onclick="resetForm()">↺ RESET</button>
+    </div>
+
+    <div class="section-label">01 VISUAL REFERENCES</div>
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">⊕</div>
+      <p>TAP TO UPLOAD REFERENCES<br><span>( IDENTITY &amp; BRAND LOCK )</span></p>
+    </div>
+    <input type="file" id="fileInput" style="display:none" accept="image/*" multiple onchange="handleUpload(event)">
+    <div class="thumbs" id="thumbs"></div>
+
+    <div class="divider"></div>
+
+    <div class="story-header">
+      <div class="section-label">02 STORY NARRATION /<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HOOK</div>
+      <button class="hook-btn"><span class="icon">◈</span>CONTENT<br>HOOK</button>
+    </div>
+    <textarea class="story-input" id="storyInput" placeholder="Describe the struggle or solution..."></textarea>
+
+    <div class="divider"></div>
+
+    <div class="section-label">03 SCENE LENGTH</div>
+    <div class="scene-row">
+      <div class="scene-box" id="sceneBox" onclick="cycleScene()">4</div>
+      <div class="scene-hint">TAP TO CYCLE<br>SCENE COUNT<br>[ 2 → 4 → 6 → 8 ]</div>
+    </div>
+
+    <div class="section-label">03.5 BACKGROUND SETTING</div>
+    <div class="custom-select" id="bgSelect">
+      <button class="custom-select-btn" id="bgBtn" onclick="toggleBg()">
+        <span id="bgSelected">AUTO (AI DECISION)</span>
+        <span class="drop-arrow">▾</span>
+      </button>
+      <div class="dropdown-menu" id="bgMenu">
+        <div class="dropdown-item selected" onclick="pickBg('AUTO (AI DECISION)',this)">AUTO (AI DECISION)<div class="radio-circle"><div class="radio-dot"></div></div></div>
+        <div class="dropdown-item" onclick="pickBg('LIVING ROOM',this)">LIVING ROOM<div class="radio-circle"></div></div>
+        <div class="dropdown-item" onclick="pickBg('STUDIO',this)">STUDIO<div class="radio-circle"></div></div>
+        <div class="dropdown-item" onclick="pickBg('OUTDOOR',this)">OUTDOOR<div class="radio-circle"></div></div>
+        <div class="dropdown-item" onclick="pickBg('CAFE',this)">CAFE<div class="radio-circle"></div></div>
+        <div class="dropdown-item" onclick="pickBg('HOTEL LOBBY',this)">HOTEL LOBBY<div class="radio-circle"></div></div>
+        <div class="dropdown-item" onclick="pickBg('NATURE / PARK',this)">NATURE / PARK<div class="radio-circle"></div></div>
+        <div class="dropdown-item" onclick="pickBg('CUSTOM SETTING...',this)">CUSTOM SETTING...<div class="radio-circle"></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">04 LEAD CHARACTER</div>
+    <div class="btn-grid-3">
+      <button class="sel-btn active" onclick="pickChar(this)">FEMALE<br>(HIJAB)</button>
+      <button class="sel-btn" onclick="pickChar(this)">MALE<br>(PRO)</button>
+      <button class="sel-btn" onclick="pickChar(this)">POV<br>(HANDS)</button>
+    </div>
+    <div class="btn-grid-2">
+      <button class="sel-btn" onclick="pickChar(this)">PRODUCT ONLY</button>
+      <button class="sel-btn" onclick="pickChar(this)">CUSTOM</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">05 ASPECT RATIO</div>
+    <div class="ratio-grid">
+      <button class="ratio-btn active" onclick="pickRatio(this,'9:16')">9:16 (VERT)</button>
+      <button class="ratio-btn" onclick="pickRatio(this,'16:9')">16:9 (HORZ)</button>
+    </div>
+
+    <div class="section-label">06 PREVIEW AREA</div>
+    <div class="preview-wrap">
+      <div class="preview-inner" id="previewBox">
+        <div class="preview-grid"></div>
+        <div class="preview-corner tl"></div><div class="preview-corner tr"></div>
+        <div class="preview-corner bl"></div><div class="preview-corner br"></div>
+        <div class="preview-label">PREVIEW AREA<br><span id="previewRatio">(9:16)</span></div>
+      </div>
+    </div>
+
+    <button class="generate-btn" onclick="generate()">⚡ GENERATE</button>
+
+    <div id="outputBox" style="display:none; margin-top:22px;"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="outsideClose(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⬡ AI IMAGE GENERATOR</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-label">VISUAL PROMPT</div>
+    <textarea class="modal-input" placeholder="Describe your image..."></textarea>
+
+    <div class="modal-label">IMAGE STYLE</div>
+    <div class="style-select">
+      <button class="style-btn" id="styleBtn" onclick="toggleStyle()">
+        <span id="styleSelected">CINEMATIC REALISM (RAW)</span>
+        <span class="style-arrow">▾</span>
+      </button>
+      <div class="style-menu" id="styleMenu">
+        <div class="style-item selected" onclick="pickStyle('CINEMATIC REALISM (RAW)',this)">CINEMATIC REALISM (RAW)<div class="radio-circle"><div class="radio-dot"></div></div></div>
+        <div class="style-item" onclick="pickStyle('FASHION STUDIO',this)">FASHION STUDIO<div class="radio-circle"></div></div>
+        <div class="style-item" onclick="pickStyle('ANIME / 2D',this)">ANIME / 2D<div class="radio-circle"></div></div>
+        <div class="style-item" onclick="pickStyle('3D RENDER (CUTE)',this)">3D RENDER (CUTE)<div class="radio-circle"></div></div>
+        <div class="style-item" onclick="pickStyle('CYBERPUNK',this)">CYBERPUNK<div class="radio-circle"></div></div>
+        <div class="style-item" onclick="pickStyle('OIL PAINTING',this)">OIL PAINTING<div class="radio-circle"></div></div>
+        <div class="style-item" onclick="pickStyle('MINIMALIST',this)">MINIMALIST<div class="radio-circle"></div></div>
+        <div class="style-item" onclick="pickStyle('VINTAGE FILM',this)">VINTAGE FILM<div class="radio-circle"></div></div>
+      </div>
+    </div>
+
+    <button class="modal-gen-btn" onclick="showToast('// GENERATING AI IMAGE...')">⚡ GENERATE</button>
+
+    <div class="modal-preview">
+      <div class="modal-preview-grid"></div>
+      <div class="modal-preview-text">IMAGE PREVIEW<br>WILL APPEAR HERE</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function setLang(el) {
+    document.querySelectorAll('.lang-btn').forEach(b => b.className='lang-btn inactive');
+    el.className='lang-btn active';
+  }
+  function handleUpload(e) {
+    Array.from(e.target.files).forEach(f => {
+      const r=new FileReader(); r.onload=ev=>{
+        const w=document.createElement('div'); w.className='thumb';
+        const i=document.createElement('img'); i.src=ev.target.result;
+        const b=document.createElement('button'); b.className='thumb-remove'; b.textContent='✕'; b.onclick=()=>w.remove();
+        w.appendChild(i); w.appendChild(b); document.getElementById('thumbs').appendChild(w);
+      }; r.readAsDataURL(f);
+    });
+  }
+  const scenes=[2,4,6,8]; let si=1;
+  function cycleScene(){ si=(si+1)%4; document.getElementById('sceneBox').textContent=scenes[si]; }
+  function pickChar(el){ document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
+  function pickRatio(el,r){ document.querySelectorAll('.ratio-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); document.getElementById('previewBox').className=r==='16:9'?'preview-inner horz':'preview-inner'; document.getElementById('previewRatio').textContent='('+r+')'; }
+
+  // BG Dropdown
+  function toggleBg(){
+    const btn=document.getElementById('bgBtn'); const menu=document.getElementById('bgMenu');
+    btn.classList.toggle('open'); menu.classList.toggle('open');
+  }
+  function pickBg(val,el){
+    document.getElementById('bgSelected').textContent=val;
+    document.querySelectorAll('#bgMenu .dropdown-item').forEach(i=>{ i.classList.remove('selected'); i.querySelector('.radio-circle').innerHTML=''; });
+    el.classList.add('selected'); el.querySelector('.radio-circle').innerHTML='<div class="radio-dot"></div>';
+    document.getElementById('bgBtn').classList.remove('open'); document.getElementById('bgMenu').classList.remove('open');
+  }
+
+  // Style dropdown
+  function toggleStyle(){
+    const btn=document.getElementById('styleBtn'); const menu=document.getElementById('styleMenu');
+    btn.classList.toggle('open'); menu.classList.toggle('open');
+  }
+  function pickStyle(val,el){
+    document.getElementById('styleSelected').textContent=val;
+    document.querySelectorAll('.style-item').forEach(i=>{ i.classList.remove('selected'); i.querySelector('.radio-circle').innerHTML=''; });
+    el.classList.add('selected'); el.querySelector('.radio-circle').innerHTML='<div class="radio-dot"></div>';
+    document.getElementById('styleBtn').classList.remove('open'); document.getElementById('styleMenu').classList.remove('open');
+  }
+
+  // Close dropdowns outside click
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('#bgSelect')){ document.getElementById('bgBtn').classList.remove('open'); document.getElementById('bgMenu').classList.remove('open'); }
+    if(!e.target.closest('.style-select')){ document.getElementById('styleBtn').classList.remove('open'); document.getElementById('styleMenu').classList.remove('open'); }
+  });
+
+  function openModal(){ document.getElementById('modalOverlay').classList.add('open'); }
+  function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+  function outsideClose(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+  function resetForm(){
+    document.getElementById('storyInput').value=''; document.getElementById('thumbs').innerHTML='';
+    document.getElementById('sceneBox').textContent='4'; si=1;
+    document.querySelectorAll('.sel-btn').forEach((b,i)=>{ b.classList.remove('active'); if(i===0)b.classList.add('active'); });
+    document.querySelectorAll('.ratio-btn').forEach((b,i)=>{ b.classList.remove('active'); if(i===0)b.classList.add('active'); });
+    document.getElementById('bgSelected').textContent='AUTO (AI DECISION)';
+    document.getElementById('previewBox').className='preview-inner'; document.getElementById('previewRatio').textContent='(9:16)';
+    showToast('// FORM CLEARED');
+  }
+  const GEMINI_API_KEY = 'AIzaSyD64DpgEsQ4Hl-AQqZVkeglnbIbhWgqzIc';
+
+  async function generate() {
+    const story = document.getElementById('storyInput').value.trim();
+    if (!story) { showToast('// MASUKKAN STORY/HOOK DULU!'); return; }
+
+    const sceneCount = document.getElementById('sceneBox').textContent;
+    const bg = document.getElementById('bgSelected').textContent;
+    const activeChar = document.querySelector('.sel-btn.active');
+    const character = activeChar ? activeChar.textContent.replace('\n',' ').trim() : 'AUTO';
+    const ratio = document.getElementById('previewRatio').textContent.replace(/[()]/g,'').trim();
+
+    const btn = document.querySelector('.generate-btn');
+    btn.textContent = '⚡ GENERATING...';
+    btn.disabled = true;
+
+    const outputBox = document.getElementById('outputBox');
+    outputBox.style.display = 'block';
+    outputBox.innerHTML = '<div class="out-loading">// AI SEDANG PROSES... ⚡</div>';
+
+    const prompt = `Kau adalah pakar content strategy untuk social media video. Berikan output dalam Bahasa Melayu.
+
+Input dari user:
+- Story/Hook: ${story}
+- Bilangan Scene: ${sceneCount}
+- Background: ${bg}
+- Karakter: ${character}
+- Aspect Ratio: ${ratio}
+
+Hasilkan output dalam format JSON seperti berikut (HANYA JSON, tiada teks lain):
+{
+  "hook": "Ayat hook pembuka yang power dan menarik perhatian (1-2 ayat)",
+  "caption": "Caption lengkap untuk post social media (3-5 ayat dengan emoji)",
+  "scenes": ["Scene 1: ...", "Scene 2: ...", "Scene 3: ...", "Scene 4: ..."],
+  "cta": "Call-to-action yang kuat untuk end scene",
+  "imagePrompt": "Detailed English prompt untuk AI image generator berdasarkan setting dan karakter yang dipilih"
+}`;
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+
+      const data = await res.json();
+      let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      text = text.replace(/```json|```/g, '').trim();
+      const result = JSON.parse(text);
+
+      outputBox.innerHTML = `
+        <div class="out-section">
+          <div class="out-label">// HOOK PEMBUKA</div>
+          <div class="out-content hook-text">${result.hook}</div>
+        </div>
+        <div class="out-section">
+          <div class="out-label">// CAPTION POST</div>
+          <div class="out-content">${result.caption}</div>
+        </div>
+        <div class="out-section">
+          <div class="out-label">// SCENE BREAKDOWN</div>
+          ${result.scenes.map((s,i)=>`<div class="out-scene"><span class="scene-num">0${i+1}</span>${s}</div>`).join('')}
+        </div>
+        <div class="out-section">
+          <div class="out-label">// CALL-TO-ACTION</div>
+          <div class="out-content cta-text">${result.cta}</div>
+        </div>
+        <div class="out-section">
+          <div class="out-label">// IMAGE PROMPT (AI)</div>
+          <div class="out-content prompt-text">${result.imagePrompt}</div>
+          <button class="copy-btn" onclick="copyPrompt('${result.imagePrompt.replace(/'/g,"\\'")}')">⊕ COPY PROMPT</button>
+        </div>
+      `;
+      showToast('// CONTENT STRATEGY SIAP! ✅');
+    } catch(e) {
+      outputBox.innerHTML = '<div class="out-loading" style="color:#ff4500">// ERROR: Semak API key atau cuba lagi.</div>';
+      showToast('// ERROR! CUBA LAGI');
+    }
+
+    btn.textContent = '⚡ GENERATE';
+    btn.disabled = false;
+  }
+
+  function copyPrompt(text) {
+    navigator.clipboard.writeText(text).then(()=>showToast('// PROMPT COPIED! ✅'));
+  }
+  function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+</script>
+</body>
+</html>
