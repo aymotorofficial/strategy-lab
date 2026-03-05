@@ -311,6 +311,11 @@
       </div>
     </div>
 
+    <div class="section-label">07 API KEY</div>
+    <div style="display:flex;gap:8px;margin-bottom:22px;">
+      <input type="password" id="apiKeyInput" placeholder="Paste API key di sini..." value="" style="flex:1;background:var(--card2);border:1.5px solid var(--border);border-radius:6px;padding:12px 14px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;" oninput="saveKey(this.value)">
+    </div>
+
     <button class="generate-btn" onclick="generate()">⚡ GENERATE</button>
 
     <div id="outputBox" style="display:none; margin-top:22px;"></div>
@@ -422,13 +427,15 @@
   }
   let GEMINI_API_KEY = sessionStorage.getItem('gemini_key') || '';
 
+  function saveKey(val) {
+    GEMINI_API_KEY = val.trim();
+    sessionStorage.setItem('gemini_key', GEMINI_API_KEY);
+  }
+
   async function generate() {
-    if (!GEMINI_API_KEY) {
-      const key = prompt('Masukkan Gemini API Key kau:');
-      if (!key) return;
-      GEMINI_API_KEY = key.trim();
-      sessionStorage.setItem('gemini_key', GEMINI_API_KEY);
-    }
+    const keyInput = document.getElementById('apiKeyInput').value.trim();
+    if (keyInput) GEMINI_API_KEY = keyInput;
+    if (!GEMINI_API_KEY) { showToast('// MASUKKAN API KEY DULU!'); return; }
     const story = document.getElementById('storyInput').value.trim();
     if (!story) { showToast('// MASUKKAN STORY/HOOK DULU!'); return; }
 
