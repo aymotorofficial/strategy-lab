@@ -420,9 +420,15 @@
     document.getElementById('previewBox').className='preview-inner'; document.getElementById('previewRatio').textContent='(9:16)';
     showToast('// FORM CLEARED');
   }
-  const GEMINI_API_KEY = 'AIzaSyD64DpgEsQ4Hl-AQqZVkeglnbIbhWgqzIc';
+  let GEMINI_API_KEY = sessionStorage.getItem('gemini_key') || '';
 
   async function generate() {
+    if (!GEMINI_API_KEY) {
+      const key = prompt('Masukkan Gemini API Key kau:');
+      if (!key) return;
+      GEMINI_API_KEY = key.trim();
+      sessionStorage.setItem('gemini_key', GEMINI_API_KEY);
+    }
     const story = document.getElementById('storyInput').value.trim();
     if (!story) { showToast('// MASUKKAN STORY/HOOK DULU!'); return; }
 
@@ -459,16 +465,27 @@ Hasilkan output dalam format JSON seperti berikut (HANYA JSON, tiada teks lain):
 }`;
 
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        body: JSON.stringify({ 
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+        })
       });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData?.error?.message || 'API Error ' + res.status);
+      }
 
       const data = await res.json();
       let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       text = text.replace(/```json|```/g, '').trim();
-      const result = JSON.parse(text);
+      // Extract JSON if wrapped in other text
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON in response');
+      const result = JSON.parse(jsonMatch[0]);
 
       outputBox.innerHTML = `
         <div class="out-section">
@@ -495,7 +512,7 @@ Hasilkan output dalam format JSON seperti berikut (HANYA JSON, tiada teks lain):
       `;
       showToast('// CONTENT STRATEGY SIAP! ✅');
     } catch(e) {
-      outputBox.innerHTML = '<div class="out-loading" style="color:#ff4500">// ERROR: Semak API key atau cuba lagi.</div>';
+      outputBox.innerHTML = `<div class="out-loading" style="color:#ff4500">// ERROR: ${e.message}</div>`;
       showToast('// ERROR! CUBA LAGI');
     }
 
